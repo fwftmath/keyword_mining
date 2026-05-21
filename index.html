@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Volleyball Spike: Percentage Tournament</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e0f2fe; /* Soft volleyball sky blue */
+            color: #1e293b;
+            margin: 0;
+            padding: 15px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15);
+            border: 4px solid #0284c7;
+            width: 100vw;
+            max-width: 1024px; /* iPad Landscape Optimum */
+            height: 92vh;
+            max-height: 768px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px dashed #bae6fd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin: 0;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #0284c7;
+            color: white;
+            padding: 6px 18px;
+            border-radius: 20px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        /* Horizontal Split Court Layout */
+        .court-workspace {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+        /* Left Side: Defending Court (Locked Clues & Targets) */
+        .left-court {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+        }
+        .scoreboard-question {
+            background-color: #fef08a; /* Bright stadium yellow */
+            border-left: 6px solid #eab308;
+            padding: 15px;
+            font-size: 1.15rem;
+            line-height: 1.5;
+            border-radius: 8px;
+            font-weight: 500;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .court-zones {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+        .zone-box {
+            border: 2px dashed #0284c7;
+            border-radius: 10px;
+            padding: 12px 18px;
+            background-color: #f0f9ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .zone-box.active-set {
+            border-color: #f97316; /* Volleyball orange active ring */
+            background-color: #fff7ed;
+            transform: scale(1.01);
+        }
+        .zone-box h3 {
+            margin: 0;
+            font-size: 1.05rem;
+            color: #0369a1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mined-ball {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #94a3b8;
+            text-align: right;
+            max-width: 60%;
+        }
+        .mined-ball.secured {
+            color: #ffffff;
+            background-color: #f97316; /* Volleyball Orange */
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid #ea580c;
+            box-shadow: 0 3px 6px rgba(249, 115, 22, 0.3);
+        }
+        /* Right Side: Attack Zone (Action Taps) */
+        .right-attack-zone {
+            background-color: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            position: relative;
+        }
+        .umpire-instruction {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: #334155;
+            background-color: #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #475569;
+        }
+        .action-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .ball-btn, .spike-btn {
+            width: 100%;
+            background-color: #ffffff;
+            border: 2px solid #cbd5e1;
+            padding: 14px 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 500;
+            text-align: left;
+            transition: all 0.15s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        /* iPad Fluid Active Press states */
+        .ball-btn:active, .spike-btn:active {
+            background-color: #f1f5f9;
+        }
+        .ball-btn.selected {
+            background-color: #ffedd5;
+            border-color: #f97316;
+            color: #ea580c;
+            font-weight: bold;
+        }
+        .stadium-feedback {
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+            margin-top: auto;
+            display: none;
+        }
+        .stadium-feedback.perfect { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .stadium-feedback.out { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        .next-match-btn {
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <header>
+        <h1>🏐 Volleyball Spike: Percentage Tournament</h1>
+        <div class="stats">
+            <span id="level-display">Set: 1/3</span>
+            <span id="score-display">Points: 0</span>
+        </div>
+    </header>
+
+    <div class="court-workspace">
+        <div class="left-court">
+            <div class="scoreboard-question" id="question-text">
+                Loading match problem...
+            </div>
+            
+            <div class="court-zones">
+                <div class="zone-box" id="box-U" onclick="mineToVariable('U')">
+                    <h3>📈 Front Row: Markup (U% / U)</h3>
+                    <div class="mined-ball" id="mined-U">🏐 Unset</div>
+                </div>
+                <div class="zone-box" id="box-D" onclick="mineToVariable('D')">
+                    <h3>🛡️ Back Row: Discount (D% / D)</h3>
+                    <div class="mined-ball" id="mined-D">🏐 Unset</div>
+                </div>
+                <div class="zone-box" id="box-P" onclick="mineToVariable('P')">
+                    <h3>📊 Scoreboard: Profit / Loss (P)</h3>
+                    <div class="mined-ball" id="mined-P">🏐 Unset</div>
+                </div>
+            </div>
+             <img src='.\keyword.png' width=80% align=center>
+        </div>
+
+        <div class="right-attack-zone">
+            <div class="umpire-instruction" id="step-instruction">
+                PASS THE BALL: Tap a phrase card below, then tap its proper Court Zone on the left to set it up!
+            </div>
+            
+            <div class="action-scroll" id="interactive-content">
+                </div>
+
+            <div class="stadium-feedback" id="feedback-box"></div>
+            <button class="next-match-btn" id="next-level-btn" onclick="nextLevel()">Next Rally ➡️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const levels = [
+        {
+            fullText: "The selling price of a gadget is $300. The gadget is sold at a discount of 20% on its marked price. The marked price of the gadget is 50% above its cost.",
+            phrases: ["discount of 20%", "50% above its cost"],
+            correctMapping: { "discount of 20%": "D", "50% above its cost": "U" },
+            formulas: [
+                { text: "S = M × (1 - 20%)  and  M = C × (1 + 50%)", correct: true },
+                { text: "S = M × (1 - 20%)  and  C = M × (1 + 50%)", correct: false },
+                { text: "M = S × (1 - 20%)  and  M = C × (1 - 50%)", correct: false }
+            ]
+        },
+        {
+            fullText: "The marked price of a vase is 30% above its cost. A loss of $88 is made by selling the vase at a discount of 40% on its marked price.",
+            phrases: ["30% above its cost", "discount of 40%", "loss of $88"],
+            correctMapping: { "30% above its cost": "U", "discount of 40%": "D", "loss of $88": "P" },
+            formulas: [
+                { text: "M = C × (1 - 30%) | S = M × (1 + 40%) | Profit: S - C = 88", correct: false },
+                { text: " M = C × (1 + 30%) | S = M × (1 - 40%) | Loss: C - S = 88", correct: true },
+                { text: "S = C × (1 + 30%) | M = S × (1 - 40%) | Loss: C - S = 88", correct: false }
+            ]
+        },
+        {
+            fullText: "The marked price of a textbook is 40% above its cost. A loss of $18 is incurred if the textbook is sold at a discount of 35% on its marked price.",
+            phrases: ["40% above its cost", "loss of $18", "discount of 35%"],
+            correctMapping: { "40% above its cost": "U", "loss of $18": "P", "discount of 35%": "D" },
+            formulas: [
+                { text: "C = M × (1 + 40%) | S = M × (1 - 35%) | Loss: C - S = 18", correct: false },
+                { text: "M = C × (1 + 40%) | S = M × (1 - 35%) | Profit: S - C = 18", correct: false },
+                { text: "M = C × (1 + 40%) | S = M × (1 - 35%) | Loss: C - S = 18", correct: true }
+            ]
+        }
+    ];
+
+    let currentLevelIdx = 0;
+    let score = 0;
+    let selectedPhrase = null;
+    let currentMined = { U: null, D: null, P: null };
+    let phase = 1;
+
+    function initLevel() {
+        phase = 1;
+        const lvl = levels[currentLevelIdx];
+        
+        document.getElementById("level-display").innerText = `Set: ${currentLevelIdx + 1}/${levels.length}`;
+        document.getElementById("question-text").innerText = lvl.fullText;
+        document.getElementById("step-instruction").innerText = "🏐 PERFECT SET: Tap an attack text ball below, then assign it to its exact Court Position on the left.";
+        
+        selectedPhrase = null;
+        currentMined = { U: null, D: null, P: null };
+        
+        ['U', 'D', 'P'].forEach(v => {
+            const el = document.getElementById(`mined-${v}`);
+            el.innerText = "🏐 Unset";
+            el.className = "mined-ball";
+            document.getElementById(`box-${v}`).classList.add("active-set");
+        });
+
+        document.getElementById("feedback-box").style.display = "none";
+        document.getElementById("next-level-btn").style.display = "none";
+
+        renderPhrases();
+    }
+
+    function renderPhrases() {
+        const container = document.getElementById("interactive-content");
+        container.innerHTML = "";
+        const lvl = levels[currentLevelIdx];
+        
+        lvl.phrases.forEach(phrase => {
+            if (!Object.values(currentMined).includes(phrase)) {
+                const btn = document.createElement("button");
+                btn.className = "ball-btn";
+                btn.innerText = `🏐 ${phrase}`;
+                btn.onclick = () => {
+                    document.querySelectorAll(".ball-btn").forEach(b => b.classList.remove("selected"));
+                    btn.classList.add("selected");
+                    selectedPhrase = phrase;
+                };
+                container.appendChild(btn);
+            }
+        });
+    }
+
+    function mineToVariable(varType) {
+        if (phase !== 1) return;
+        if (!selectedPhrase) {
+            showFeedback(false, "Pick up an attack ball phrase from the right menu first!");
+            return;
+        }
+
+        const lvl = levels[currentLevelIdx];
+        if (lvl.correctMapping[selectedPhrase] === varType) {
+            currentMined[varType] = selectedPhrase;
+            
+            const displayEl = document.getElementById(`mined-${varType}`);
+            displayEl.innerText = selectedPhrase;
+            displayEl.className = "mined-ball secured";
+            
+            selectedPhrase = null;
+            score += 50;
+            document.getElementById("score-display").innerText = `Points: ${score}`;
+            showFeedback(true, "Nice Set! Ball placed perfectly into court position.");
+            
+            renderPhrases();
+            checkMiningCompletion();
+        } else {
+            showFeedback(false, "Ball Out! That text metric doesn't align with this court zone position.");
+            score = Math.max(0, score - 10);
+            document.getElementById("score-display").innerText = `Points: ${score}`;
+        }
+    }
+
+    function checkMiningCompletion() {
+        const lvl = levels[currentLevelIdx];
+        const requiredVars = Object.values(lvl.correctMapping);
+        let allMined = requiredVars.every(v => currentMined[v] !== null);
+        
+        if (allMined) {
+            phase = 2;
+            ['U', 'D', 'P'].forEach(v => document.getElementById(`box-${v}`).classList.remove("active-set"));
+            document.getElementById("step-instruction").innerText = "🔥 READY TO SPIKE: Your sets are locked on the left. Pick the match-winning formula smash below!";
+            showFeedback(true, "Incredible setup! The balls are beautifully positioned. Time to spike!");
+            renderFormulas();
+        }
+    }
+
+    function renderFormulas() {
+        const container = document.getElementById("interactive-content");
+        container.innerHTML = "";
+        const lvl = levels[currentLevelIdx];
+
+        lvl.formulas.forEach(form => {
+            const btn = document.createElement("button");
+            btn.className = "spike-btn";
+            btn.innerText = form.text;
+            btn.onclick = () => {
+                if (form.correct) {
+                    score += 50;
+                    document.getElementById("score-display").innerText = `Points: ${score}`;
+                    showFeedback(true, "🔥 SERVICE ACE! Perfect Spike! You scored the point for this formula setup!");
+                    container.innerHTML = "";
+                    document.getElementById("next-level-btn").style.display = "block";
+                } else {
+                    showFeedback(false, "❌ Blocked! That mathematical setup is out of bounds for your court variables.");
+                    score = Math.max(0, score - 15);
+                    document.getElementById("score-display").innerText = `Points: ${score}`;
+                }
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function showFeedback(isSuccess, message) {
+        const fb = document.getElementById("feedback-box");
+        fb.className = `stadium-feedback ${isSuccess ? 'perfect' : 'out'}`;
+        fb.innerText = message;
+        fb.style.display = "block";
+    }
+
+    function nextLevel() {
+        currentLevelIdx++;
+        if (currentLevelIdx < levels.length) {
+            initLevel();
+        } else {
+            document.getElementById("question-text").innerText = "🏆 CHAMPIONSHIP POINT! You've successfully conquered the algebraic court with flawless variable mining and formula connections!";
+            document.getElementById("step-instruction").innerText = "Tournament Won.";
+            document.getElementById("interactive-content").innerHTML = "";
+            document.getElementById("feedback-box").style.display = "none";
+            document.getElementById("next-level-btn").style.display = "none";
+        }
+    }
+
+    initLevel();
+</script>
+
+</body>
+</html>
