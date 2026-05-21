@@ -176,7 +176,7 @@
         .ball-btn:active, .spike-btn:active {
             background-color: #f1f5f9;
         }
-        .ball-btn.selected {
+        .ball-btn.selected, .spike-btn.selected {
             background-color: #ffedd5;
             border-color: #f97316;
             color: #ea580c;
@@ -241,7 +241,7 @@
                     <div class="mined-ball" id="mined-P">🏐 Unset</div>
                 </div>
             </div>
-             <img src='.\keyword.png' width=80% align=center>
+            <img src='./keyword.png' width="80%" align="center" alt="Keyword Guide">
         </div>
 
         <div class="right-attack-zone">
@@ -250,7 +250,7 @@
             </div>
             
             <div class="action-scroll" id="interactive-content">
-                </div>
+            </div>
 
             <div class="stadium-feedback" id="feedback-box"></div>
             <button class="next-match-btn" id="next-level-btn" onclick="nextLevel()">Next Rally ➡️</button>
@@ -263,21 +263,21 @@
         {
             fullText: "The selling price of a gadget is $300. The gadget is sold at a discount of 20% on its marked price. The marked price of the gadget is 50% above its cost.",
             phrases: ["discount of 20%", "50% above its cost"],
-            correctMapping: { "discount of 20%": "D", "50% above its cost": "U" },
+            correctMapping: { "50% above its cost": "U", "discount of 20%": "D" },
             formulas: [
-                { text: "S = M × (1 - 20%)  and  M = C × (1 + 50%)", correct: true },
-                { text: "S = M × (1 - 20%)  and  C = M × (1 + 50%)", correct: false },
-                { text: "M = S × (1 - 20%)  and  M = C × (1 - 50%)", correct: false }
+                { text: "S = M(1 - 20%)  and  M = C(1 + 50%)", correct: true },
+                { text: "S = M(1 - 20%)  and  C = M(1 + 50%)", correct: false },
+                { text: "M = S(1 - 20%)  and  M = C(1 - 50%)", correct: false }
             ]
         },
         {
             fullText: "The marked price of a vase is 30% above its cost. A loss of $88 is made by selling the vase at a discount of 40% on its marked price.",
             phrases: ["30% above its cost", "discount of 40%", "loss of $88"],
-            correctMapping: { "30% above its cost": "U", "discount of 40%": "D", "loss of $88": "P" },
+            correctMapping: { "loss of $88": "P","30% above its cost": "U", "discount of 40%": "D" },
             formulas: [
-                { text: "M = C × (1 - 30%) | S = M × (1 + 40%) | Profit: S - C = 88", correct: false },
-                { text: " M = C × (1 + 30%) | S = M × (1 - 40%) | Loss: C - S = 88", correct: true },
-                { text: "S = C × (1 + 30%) | M = S × (1 - 40%) | Loss: C - S = 88", correct: false }
+                { text: "M = C (1 - 30%) | S = M(1 + 40%) |  S - C = 88", correct: false },
+                { text: " M = C(1 + 30%) | S = M (1 - 40%) |  C - S = 88", correct: true },
+                { text: "S = C(1 + 30%) | M = S(1 - 40%) | C - S = 88", correct: false }
             ]
         },
         {
@@ -285,9 +285,9 @@
             phrases: ["40% above its cost", "loss of $18", "discount of 35%"],
             correctMapping: { "40% above its cost": "U", "loss of $18": "P", "discount of 35%": "D" },
             formulas: [
-                { text: "C = M × (1 + 40%) | S = M × (1 - 35%) | Loss: C - S = 18", correct: false },
-                { text: "M = C × (1 + 40%) | S = M × (1 - 35%) | Profit: S - C = 18", correct: false },
-                { text: "M = C × (1 + 40%) | S = M × (1 - 35%) | Loss: C - S = 18", correct: true }
+                { text: "C = M(1 + 40%) | S = M(1 - 35%) | C - S = 18", correct: false },
+                { text: "M = C(1 + 40%) | S = M(1 - 35%) | S - C = 18", correct: false },
+                { text: "M = C(1 + 40%) | S = M(1 - 35%) | C - S = 18", correct: true }
             ]
         }
     ];
@@ -395,11 +395,14 @@
             btn.className = "spike-btn";
             btn.innerText = form.text;
             btn.onclick = () => {
+                // Change color style on selection just like the Phase 1 phrase buttons
+                document.querySelectorAll(".spike-btn").forEach(b => b.classList.remove("selected"));
+                btn.classList.add("selected");
+
                 if (form.correct) {
                     score += 50;
                     document.getElementById("score-display").innerText = `Points: ${score}`;
                     showFeedback(true, "🔥 SERVICE ACE! Perfect Spike! You scored the point for this formula setup!");
-                    container.innerHTML = "";
                     document.getElementById("next-level-btn").style.display = "block";
                 } else {
                     showFeedback(false, "❌ Blocked! That mathematical setup is out of bounds for your court variables.");
