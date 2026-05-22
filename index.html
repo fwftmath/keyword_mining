@@ -229,15 +229,15 @@
             
             <div class="court-zones">
                 <div class="zone-box" id="box-U" onclick="mineToVariable('U')">
-                    <h3>📈 Front Row: Markup (U% / U)</h3>
+                    <h3>Markup ( U%  /  U )</h3>
                     <div class="mined-ball" id="mined-U">🏐 Unset</div>
                 </div>
                 <div class="zone-box" id="box-D" onclick="mineToVariable('D')">
-                    <h3>🛡️ Back Row: Discount (D% / D)</h3>
+                    <h3>Discount ( D%  /  D ) </h3>
                     <div class="mined-ball" id="mined-D">🏐 Unset</div>
                 </div>
                 <div class="zone-box" id="box-P" onclick="mineToVariable('P')">
-                    <h3>📊 Scoreboard: Profit / Loss (P)</h3>
+                    <h3>Profit / Loss ( P%  /  P )</h3>
                     <div class="mined-ball" id="mined-P">🏐 Unset</div>
                 </div>
             </div>
@@ -265,9 +265,9 @@
             phrases: ["discount of 20%", "50% above its cost"],
             correctMapping: { "50% above its cost": "U", "discount of 20%": "D" },
             formulas: [
-                { text: "S = M(1 - 20%)  and  M = C(1 + 50%)", correct: true },
-                { text: "S = M(1 - 20%)  and  C = M(1 + 50%)", correct: false },
-                { text: "M = S(1 - 20%)  and  M = C(1 - 50%)", correct: false }
+                { text: "S = M(1 - 20%)  |  M = C(1 + 50%)", correct: true },
+                { text: "S = M(1 - 20%)  |  C = M(1 + 50%)", correct: false },
+                { text: "M = S(1 - 20%)  |  M = C(1 - 50%)", correct: false }
             ]
         },
         {
@@ -276,8 +276,8 @@
             correctMapping: { "loss of $88": "P","30% above its cost": "U", "discount of 40%": "D" },
             formulas: [
                 { text: "M = C (1 - 30%) | S = M(1 + 40%) |  S - C = 88", correct: false },
-                { text: " M = C(1 + 30%) | S = M (1 - 40%) |  C - S = 88", correct: true },
-                { text: "S = C(1 + 30%) | M = S(1 - 40%) | C - S = 88", correct: false }
+                { text: "M = C(1 + 30%) | S = M (1 - 40%) |  S - C = -88", correct: true },
+                { text: "S = C(1 + 30%) | M = S(1 - 40%) | S - C = -88", correct: false }
             ]
         },
         {
