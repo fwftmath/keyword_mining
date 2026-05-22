@@ -285,9 +285,9 @@
             phrases: ["40% above its cost", "loss of $18", "discount of 35%"],
             correctMapping: { "40% above its cost": "U", "loss of $18": "P", "discount of 35%": "D" },
             formulas: [
-                { text: "C = M(1 + 40%) | S = M(1 - 35%) | C - S = 18", correct: false },
+                { text: "C = M(1 + 40%) | S = M(1 - 35%) | S - C = -18", correct: false },
                 { text: "M = C(1 + 40%) | S = M(1 - 35%) | S - C = 18", correct: false },
-                { text: "M = C(1 + 40%) | S = M(1 - 35%) | C - S = 18", correct: true }
+                { text: "M = C(1 + 40%) | S = M(1 - 35%) | S - C = -18", correct: true }
             ]
         }
     ];
